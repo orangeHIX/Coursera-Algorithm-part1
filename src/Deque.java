@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -183,6 +184,5 @@ public class Deque<Item> implements Iterable<Item> {
         d.addFirst(0);
         d.removeLast();
         StdOut.println(d.toS() + "\n" + d.isEmpty());
-
     }
 }
