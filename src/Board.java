@@ -1,3 +1,6 @@
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+
 import java.util.Iterator;
 
 /**
@@ -5,13 +8,28 @@ import java.util.Iterator;
  */
 public class Board {
 
-    private int[][] blocks;
+    private char[] tiles;
     private int n;
 
     public Board(int[][] blocks) // construct a board from an n-by-n array of blocks
     {
-        this.blocks = blocks;
+
         this.n = blocks.length;
+        this.tiles = new char[n * n];
+        for (int i = 0; i < blocks.length; i++) {
+            for (int j = 0; j < blocks.length; j++) {
+                this.tiles[i * n + j] = (char) blocks[i][j];
+            }
+        }
+        //StdOut.print(this.toString());
+    }
+
+    private Board(char[] blocks) {
+        this.n = (int) Math.sqrt(blocks.length);
+        this.tiles = new char[n * n];
+        for (int i = 0; i < blocks.length; i++) {
+            tiles[i] = blocks[i];
+        }
     }
 
     // (where blocks[i][j] = block in row i, column j)
@@ -24,7 +42,7 @@ public class Board {
     {
         int count = 0;
         for (int i = 0; i < n * n - 1; i++) {
-            if (blocks[i / n][i % n] != i + 1) {
+            if (tiles[i] != i + 1) {
                 count++;
             }
         }
@@ -37,7 +55,7 @@ public class Board {
         for (int i = 0; i < n * n; i++) {
             int cur_x = i / n;
             int cur_y = i % n;
-            int val = blocks[cur_x][cur_y];
+            int val = tiles[i];
             if (val != 0) {
                 int x = (val - 1) / n;
                 int y = (val - 1) % n;
@@ -56,20 +74,21 @@ public class Board {
     public Board twin() // a board that is obtained by exchanging any pair of blocks
     {
         int i = 0;
-        while (blocks[i / n][i % n] == 0) i++;
+        while (tiles[i] == 0) i++;
         int a = i;
         i++;
-        while (blocks[i / n][i % n] == 0) i++;
+        while (tiles[i] == 0) i++;
         int b = i;
 
-        Board copy = new Board(blocks);
+        Board copy = new Board(tiles);
         copy.exch(a, b);
         return copy;
     }
 
     public boolean equals(Object y) // does this board equal y?
     {
-        if (y instanceof Board) {
+
+        if (y != null && y instanceof Board) {
             Board by = (Board) y;
 
             if (by.dimension() != dimension()) return false;
@@ -96,9 +115,13 @@ public class Board {
 
             @Override
             public boolean hasNext() {
-
-                while (!isLegalIndex(getNextExchIndex())
-                        && next_v < vx.length) {
+                int x = blankIndex / n;
+                int y = blankIndex % n;
+                while (next_v < vx.length) {
+                    int ex_x = x + vx[next_v];
+                    int ex_y = y + vy[next_v];
+                    if (isLegalIndex(ex_x, ex_y))
+                        break;
                     next_v++;
                 }
                 if (next_v < vx.length) return true;
@@ -109,8 +132,9 @@ public class Board {
             public Board next() {
                 if (!hasNext()) return null;
 
-                Board b = new Board(blocks);
+                Board b = new Board(tiles);
                 b.exch(getNextExchIndex(), blankIndex);
+                next_v++;
                 return b;
             }
 
@@ -124,49 +148,65 @@ public class Board {
 
     private int findBlankSquareIndex() {
         for (int i = 0; i < n * n; i++) {
-            int cur_x = i / n;
-            int cur_y = i % n;
-            if (blocks[cur_x][cur_y] == 0) {
+            if (tiles[i] == 0) {
                 return i;
             }
         }
         return -1;
     }
 
-    private boolean isLegalIndex(int index) {
-        int i = index / n;
-        int j = index % n;
+    private boolean isLegalIndex(int i, int j) {
         if (i < n && i >= 0 && j < n && j >= 0) return true;
         else return false;
     }
 
     private void exch(int indexA, int indexB) {
-        int tmp = blocks[indexA / n][indexA % n];
-        blocks[indexA / n][indexA % n] = blocks[indexB / n][indexB % n];
-        blocks[indexB / n][indexB % n] = tmp;
+        char tmp = tiles[indexA];
+        tiles[indexA] = tiles[indexB];
+        tiles[indexB] = tmp;
     }
 
     private int getValue(int i, int j) {
-        return blocks[i][j];
+        return tiles[i * n + j];
     }
 
     public String toString() // string representation of this board (in the output format specified below)
     {
         StringBuilder sb = new StringBuilder("");
+        sb.append(n + "\n");
         for (int i = 0; i < n * n; i++) {
-            int cur_x = i / n;
+            //int cur_x = i / n;
             int cur_y = i % n;
-            int val = blocks[cur_x][cur_y];
-            sb.append(val);
-            if (cur_y < n - 1) sb.append('\t');
-            if (cur_y == n - 1 && cur_x != n - 1) sb.append('\n');
+            //int val = tiles[i];
+            sb.append(String.format("%2d ", (int) tiles[i]));
+            if (cur_y == n - 1) sb.append('\n');
         }
         return sb.toString();
     }
 
+    private static Board getBoard(String filename) {
+        // create initial board from file
+        In in = new In(filename);
+        int n = in.readInt();
+        int[][] blocks = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                blocks[i][j] = in.readInt();
+        in.close();
+
+        Board initial = new Board(blocks);
+        return initial;
+    }
 
     public static void main(String[] args) // unit tests (not graded)
     {
 
+        Board board = getBoard("./test/8puzzle/puzzle01.txt");
+//        StdOut.print(board);
+//        board.exch(0,1);
+        StdOut.print(board);
+        for (Board b : board.neighbors()) {
+            StdOut.print(b);
+        }
     }
 }
