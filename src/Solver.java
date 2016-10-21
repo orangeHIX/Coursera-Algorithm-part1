@@ -34,8 +34,6 @@ public class Solver {
         q.insert(getNode(null, initial, 0));
         q.insert(getNode(null, twin, 0));
 
-        //StdOut.println("Step 0:\n" + q);
-        //int i = 0;
         Node node = null;
         while (!q.isEmpty() && !(node = q.delMin()).val.isGoal()) {
             Board curr = node.val;
@@ -67,16 +65,6 @@ public class Solver {
     private static Node getNode(Node pre, Board val, int moves) {
         return new ManhattanNode(pre, val, moves);
     }
-
-//    private String toQString(){
-//        StringBuffer sb = new StringBuffer("");
-//        q.forEach(new Consumer<Node>() {
-//            @Override
-//            public void accept(Node node) {
-//
-//            }
-//        });
-//    }
 
     public boolean isSolvable() // is the initial board solvable?
     {
